@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  blog-app-api-mysql:
+    image: mysql:latest
+    container_name: blog-app-api-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+      MYSQL_DATABASE: $MYSQL_DATABASE
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  blog-app-api-spring-app:
+    container_name: blog-app-api-spring-app
+    build:
+      context: .
+    depends_on:
+      - blog-app-api-mysql
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - /app/target
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://blog-app-api-mysql:3306/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: $MYSQL_USER
+      SPRING_DATASOURCE_PASSWORD: $MYSQL_PASSWORD
+      SPRING_PROFILES_ACTIVE: dev
+
+volumes:
+  mysql-data:
